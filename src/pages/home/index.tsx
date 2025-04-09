@@ -1,12 +1,61 @@
 import { BsSearch } from "react-icons/bs";
 import styles from "./home.module.css";
 import { Link, useNavigate } from "react-router-dom";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
+
+interface CoinProps {
+  id: string;
+  name: string;
+  symbol: string;
+  priceUsd: string;
+  vwap24Hr: string;
+  changePercent24Hr: string;
+  rank: string;
+  supply: string;
+  maxSupply: string;
+  marketCapUsd: string;
+  volumeUsd24Hr: string;
+  explorer: string;
+}
+
+interface DataProps {
+  data: CoinProps[];
+}
 
 export function Home() {
   const [input, setInput] = useState("");
+  const [coins, setCoins] = useState<CoinProps[]>([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  async function getData() {
+    fetch(
+      "https://rest.coincap.io/v3/assets?limit=10&offset=0&apiKey=67454d839e927eb57d312ad9fcb228f58ef869a850cd0553299e0ca3c8e17f67"
+    )
+      .then((response) => response.json())
+      .then((data: DataProps) => {
+        const coinsData = data.data;
+
+        const price = Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+        });
+
+        const formatedResult = coinsData.map((value) => {
+          const formated = {
+            ...value,
+            formatedPrice: price.format(Number(value.priceUsd)),
+            formatMarket: price.format(Number(value.marketCapUsd)),
+          };
+          return formated;
+        });
+        console.log(formatedResult);
+      });
+  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
