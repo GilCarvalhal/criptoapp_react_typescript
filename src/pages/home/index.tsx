@@ -16,6 +16,9 @@ interface CoinProps {
   marketCapUsd: string;
   volumeUsd24Hr: string;
   explorer: string;
+  formatedPrice?: string;
+  formatMarket?: string;
+  formatVolume?: string;
 }
 
 interface DataProps {
@@ -45,15 +48,23 @@ export function Home() {
           currency: "USD",
         });
 
+        const priceCompact = Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: "USD",
+          notation: "compact",
+        });
+
         const formatedResult = coinsData.map((value) => {
           const formated = {
             ...value,
             formatedPrice: price.format(Number(value.priceUsd)),
-            formatMarket: price.format(Number(value.marketCapUsd)),
+            formatMarket: priceCompact.format(Number(value.marketCapUsd)),
+            formatVolume: priceCompact.format(Number(value.volumeUsd24Hr)),
           };
           return formated;
         });
         console.log(formatedResult);
+        setCoins(formatedResult);
       });
   }
 
@@ -95,31 +106,46 @@ export function Home() {
         </thead>
 
         <tbody id="tbody">
-          <tr className={styles.tr}>
-            <td className={styles.tdLabel} data-label="Moeda">
-              <div className={styles.name}>
-                <Link to={`/detail/bitcoin`}>
-                  <span>Bitcoin</span> | BTC
-                </Link>
-              </div>
-            </td>
+          {coins.length > 0 &&
+            coins.map((value) => (
+              <tr className={styles.tr} key={value.id}>
+                <td className={styles.tdLabel} data-label="Moeda">
+                  <div className={styles.name}>
+                    <img
+                    className={styles.logo}
+                      src={`https://assets.coincap.io/assets/icons/${value.symbol.toLowerCase()}@2x.png`}
+                      alt="Logo Cripto"
+                    />
+                    <Link to={`/detail/${value.id}`}>
+                      <span>{value.name}</span> | {value.symbol}
+                    </Link>
+                  </div>
+                </td>
 
-            <td className={styles.tdLabel} data-label="Valor mercado">
-              1T
-            </td>
+                <td className={styles.tdLabel} data-label="Valor mercado">
+                  {value.formatMarket}
+                </td>
 
-            <td className={styles.tdLabel} data-label="Preço">
-              8.000,00
-            </td>
+                <td className={styles.tdLabel} data-label="Preço">
+                  {value.formatedPrice}
+                </td>
 
-            <td className={styles.tdLabel} data-label="Volume">
-              2B
-            </td>
+                <td className={styles.tdLabel} data-label="Volume">
+                  {value.formatVolume}
+                </td>
 
-            <td className={styles.tdProfit} data-label="Mudança 24h">
-              <span>1.20</span>
-            </td>
-          </tr>
+                <td
+                  className={
+                    Number(value.changePercent24Hr) > 0
+                      ? styles.tdProfit
+                      : styles.tdLoss
+                  }
+                  data-label="Mudança 24h"
+                >
+                  <span>{Number(value.changePercent24Hr).toFixed(3)}</span>
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
 
