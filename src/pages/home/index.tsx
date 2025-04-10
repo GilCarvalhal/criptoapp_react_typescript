@@ -3,7 +3,7 @@ import styles from "./home.module.css";
 import { Link, useNavigate } from "react-router-dom";
 import { FormEvent, useEffect, useState } from "react";
 
-interface CoinProps {
+export interface CoinProps {
   id: string;
   name: string;
   symbol: string;
