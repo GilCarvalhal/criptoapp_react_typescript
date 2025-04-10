@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CoinProps } from "../home";
 
+import styles from "./detail.module.css";
+
 interface ResponseData {
   data: CoinProps;
 }
@@ -16,6 +18,7 @@ export function Detail() {
   const { cripto } = useParams();
 
   const [coin, setCoin] = useState<CoinProps>();
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -53,6 +56,7 @@ export function Detail() {
             };
 
             setCoin(resultData);
+            setLoading(false);
           });
       } catch (err) {
         console.log(err);
@@ -62,9 +66,54 @@ export function Detail() {
     getCoin();
   }, [cripto]);
 
+  if (loading || !coin) {
+    return (
+      <div className={styles.container}>
+        <h4 className={styles.center}>Carregando detalhes...</h4>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <h1>Página detalhe da moeda {cripto}</h1>
+    <div className={styles.container}>
+      <h1 className={styles.center}>{coin?.name}</h1>
+      <h1 className={styles.center}>{coin?.symbol}</h1>
+
+      <section className={styles.content}>
+        <img
+          src={`https://assets.coincap.io/assets/icons/${coin?.symbol.toLowerCase()}@2x.png`}
+          alt="Logo da moeda"
+          className={styles.logo}
+        />
+        <h1>
+          {coin?.name} | {coin?.symbol}
+        </h1>
+        <p>
+          <strong>Preço: </strong>
+          {coin?.formatedPrice}
+        </p>
+
+        <a href="#">
+          <strong>Mercado: </strong>
+          {coin?.formatMarket}
+        </a>
+
+        <a href="#">
+          <strong>Volume: </strong>
+          {coin?.formatVolume}
+        </a>
+
+        <a href="#">
+          <strong>Mudança 24h</strong>
+          <span
+            className={
+              Number(coin?.changePercent24Hr) > 0 ? styles.profit : styles.loss
+            }
+          >
+            {Number(coin?.changePercent24Hr).toFixed(3)}
+          </span>
+        </a>
+      </section>
     </div>
   );
 }
