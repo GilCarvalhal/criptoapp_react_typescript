@@ -28,16 +28,17 @@ interface DataProps {
 export function Home() {
   const [input, setInput] = useState("");
   const [coins, setCoins] = useState<CoinProps[]>([]);
+  const [offset, setOffset] = useState(0);
 
   const navigate = useNavigate();
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [offset]);
 
   async function getData() {
     fetch(
-      "https://rest.coincap.io/v3/assets?limit=10&offset=0&apiKey=67454d839e927eb57d312ad9fcb228f58ef869a850cd0553299e0ca3c8e17f67"
+      `https://rest.coincap.io/v3/assets?limit=10&offset=${offset}&apiKey=67454d839e927eb57d312ad9fcb228f58ef869a850cd0553299e0ca3c8e17f67`
     )
       .then((response) => response.json())
       .then((data: DataProps) => {
@@ -63,8 +64,8 @@ export function Home() {
           };
           return formated;
         });
-        console.log(formatedResult);
-        setCoins(formatedResult);
+        const listCoins = [...coins, ...formatedResult];
+        setCoins(listCoins);
       });
   }
 
@@ -77,7 +78,11 @@ export function Home() {
   }
 
   function handleGetMore() {
-    console.log("teste");
+    if (offset === 0) {
+      setOffset(10);
+      return;
+    }
+    setOffset(offset + 10);
   }
 
   return (
@@ -112,7 +117,7 @@ export function Home() {
                 <td className={styles.tdLabel} data-label="Moeda">
                   <div className={styles.name}>
                     <img
-                    className={styles.logo}
+                      className={styles.logo}
                       src={`https://assets.coincap.io/assets/icons/${value.symbol.toLowerCase()}@2x.png`}
                       alt="Logo Cripto"
                     />
